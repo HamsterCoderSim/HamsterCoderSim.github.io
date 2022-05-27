@@ -3337,7 +3337,7 @@ var Gitment = function () {
   }, {
     key: 'loginLink',
     get: function get() {
-      var oauthUri = 'https://github.com/login/oauth/authorize';
+      var oauthUri = 'https://github.com/login/oauth/access_token';
       var redirect_uri = this.oauth.redirect_uri || window.location.href;
 
       var oauthParams = Object.assign({
