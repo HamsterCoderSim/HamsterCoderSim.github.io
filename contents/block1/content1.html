@@ -266,19 +266,20 @@
                     </p>
                     
                 </article>
-                <link rel="stylesheet" href="../css/gitment.css">
-                <script type="text/javascript" src="../js/gitment.browser.js"></script>
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+                <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
                 <div id="commentContainer"> </div>
                 <script>
-                    var gitment = new Gitment({
-		                owner:'HamsterCoderSim',
-		                repo:'HamsterCoderSim.github.io',
-		                oauth: {
-                            client_id:'1c4831adc1089da8523c',
-                            client_secret:'f09eb05941ca14f7ac95a1e83ba8759850934868'
-		                },
+                    const gitalk = new Gitalk({
+                        clientID: '1c4831adc1089da8523c',
+                        clientSecret: 'f09eb05941ca14f7ac95a1e83ba8759850934868',
+                        repo: 'HamsterCoderSim.github.io',      // The repository of store comments,
+                        owner: 'HamsterCoderSim',
+                        admin: ['HamsterCoderSim'],
+                        id: location.pathname,      // Ensure uniqueness and length less than 50
+                        distractionFreeMode: false  // Facebook-like distraction free mode
                     })
-                    gitment.render('commentContainer')
+                    gitalk.render('commentContainer')
                 </script>
 
         </div>
