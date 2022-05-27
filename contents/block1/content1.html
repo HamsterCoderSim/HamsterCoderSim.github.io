@@ -269,21 +269,22 @@
                     
                 </article>
                 
-            
-            <div class="comment-box layui-row">
-                <div class="textarea-box layui-row">
-                    <textarea placeholder="仅支持纯文本，如果有什么文字无法描述的问题、建议、意见，请加QQ群"></textarea>
-                </div>
-                <div class="text-num-tips layui-row">还可以输入<span>500</span>个字</div>
-                <div class="common-btnbox">
-                    <button class="layui-btn layui-btn-normal layui-btn-sm"><i class="layui-icon">&#xe642;</i>留言</button>
-                    <button class="layui-btn layui-btn-sm"><i class="layui-icon">&#xe66f;</i>登录</button>
-                </div>
-            </div>
-            <div class="comment">
-                <div class="gitment_id">
-                </div>
-            </div>
+                <div id="container"> </div>
+                <link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+                <script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+                <script>
+                    var gitment = new Gitment({
+                        id: this.articleDetail._id，
+		                owner:'HamsterCoderSim',
+		                repo:'HamsterCoderSim.github.io',
+		                oauth: {
+                            client_id:'1c4831adc1089da8523c',
+                            client_secret:'f09eb05941ca14f7ac95a1e83ba8759850934868'
+		                },
+                    })
+                    gitment.render('container')
+                </script>
+
         </div>
     </div>
 
