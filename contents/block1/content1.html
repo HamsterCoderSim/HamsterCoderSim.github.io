@@ -8,8 +8,6 @@
     <link rel="stylesheet" href="../../css/common.css">
     <link rel="stylesheet" href="../../css/mobile.css">
     <link rel="stylesheet" href="../css/common.css">
-    <link rel="stylesheet" href="../css/gitment.css">
-    <script type="text/javascript" src="../js/gitment.browser.js"></script>
     <script type="text/javascript" src="../js/comment.js"></script>
     <script type="text/javascript" src="../code-prettify/loader/run_prettify.js"></script>
 </head>
@@ -268,21 +266,19 @@
                     </p>
                     
                 </article>
-                
-                <div id="container"> </div>
-                <link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
-                <script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+                <link rel="stylesheet" href="../css/gitment.css">
+                <script type="text/javascript" src="../js/gitment.browser.js"></script>
+                <div id="commentContainer"> </div>
                 <script>
                     var gitment = new Gitment({
-                        id: this.articleDetail._id,
-		                owner:'HamsterCoderSim',
-		                repo:'HamsterCoderSim.github.io',
+		                owner:'hamstercodersim',
+		                repo:'hamstercodersim.github.io',
 		                oauth: {
                             client_id:'1c4831adc1089da8523c',
                             client_secret:'f09eb05941ca14f7ac95a1e83ba8759850934868'
 		                },
                     })
-                    gitment.render('container')
+                    gitment.render('commentContainer')
                 </script>
 
         </div>
