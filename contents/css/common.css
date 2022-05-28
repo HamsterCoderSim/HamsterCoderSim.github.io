@@ -9,7 +9,7 @@ table{
 			
 table tr th{
 	border: solid 1px #ccc;
-	height: 30px;
+	height: 40px;
 	width: 200px;
 	background-color: #eee;
 	white-space:nowrap;    /* 设置表格自动扩展列 */
