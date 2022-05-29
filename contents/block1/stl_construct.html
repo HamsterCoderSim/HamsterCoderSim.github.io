@@ -9,7 +9,9 @@
     <link rel="stylesheet" href="../../css/mobile.css">
     <link rel="stylesheet" href="../css/common.css">
     <script type="text/javascript" src="../js/comment.js"></script>
-    <script type="text/javascript" src="../code-prettify/loader/run_prettify.js"></script>
+    <link rel="stylesheet" href="../highlight/styles/atom-one-dark.min.css">
+    <script src="../highlight/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
 </head>
 <body>
     <header>
@@ -127,87 +129,86 @@
                         ，<markCode>std::move</markCode>，完美转发等概念，需要提前掌握一下。
                     </p>
                     <p>
-                        <pre class="prettyprint"><code class="language-cpp">
-                            
-                            #ifndef TINYSTL_ALLOCATOR_H_
-                            #define TINYSTL_ALLOCATOR_H_
+                        <pre><code class="language-cpp">   
+#ifndef TINYSTL_ALLOCATOR_H_
+#define TINYSTL_ALLOCATOR_H_
 
-                            // 这个头文件包含两个函数 construct，destroy
-                            // construct : 负责对象的构造
-                            // destroy   : 负责对象的析构
+// 这个头文件包含两个函数 construct，destroy
+// construct : 负责对象的构造
+// destroy   : 负责对象的析构
 
-                            #include &lt;new&gt;
+#include &lt;new&gt;
 
-                            #include "type_traits.h"
-                            #include "iterator.h"
+#include "type_traits.h"
+#include "iterator.h"
 
-                            namespace TinySTL
-                            {
+namespace TinySTL
+{
 
-                            // construct 构造对象
-                                
-                            // 使用placement new在分配的内存ptr初始化对象，构造函数T()
-                            template &lt;typname T&gt;
-                            void construct(T* ptr)
-                            {
-                                ::new ((void*)ptr) T();                           
-                            }
-                            
-                            // 使用placement new在分配的内存ptr初始化对象，构造函数T(value);
-                            template <typename T1, typename T2>
-                            void construct(T1* ptr, const T2& value)
-                            {
-                                ::new ((void*)ptr) T1(value);                    
-                            }
+// construct 构造对象
+    
+// 使用placement new在分配的内存ptr初始化对象，构造函数T()
+template &lt;typename T&gt;
+void construct(T* ptr)
+{
+    ::new ((void*)ptr) T();                           
+}
 
-                            template <typename T, class... Args>
-                            void construct(T* ptr, Args&&... args)
-                            {
-                                ::new ((void*)ptr) T(TinySTL::forward<Args>(args)...);     //  使用forward实现不定参数的完美转发
-                            }
+// 使用placement new在分配的内存ptr初始化对象，构造函数T(value);
+template &lt;typename T1, typename T2&gt;
+void construct(T1* ptr, const T2& value)
+{
+    ::new ((void*)ptr) T1(value);                    
+}
 
-                            // destroy 将对象析构
+template &lt;typename T, typename... Args&gt;
+void construct(T* ptr, Args&&... args)
+{
+    ::new ((void*)ptr) T(TinySTL::forward<Args>(args)...);     //  使用forward实现不定参数的完美转发
+}
 
-                            template &lt;typname T&gt;
-                            void destroy_one(T*, std::true_type) {}
+// destroy 将对象析构
 
-                            // 调用了析构函数 ~T()，但是 pointer 所在内存并没有释放
-                            // 需要分配器的 operator delete(ptr) 释放
-                            template &lt;typname T&gt;
-                            void destroy_one(T* pointer, std::false_type)
-                            {
-                                if (pointer != nullptr)
-                                {
-                                    pointer->~T();                                       
-                                }
-                            }
+template &lt;typename T&gt;
+void destroy_one(T*, std::true_type) {}
 
-                            template &lt;typname ForwardIter&gt;
-                            void destroy_cat(ForwardIter , ForwardIter , std::true_type) {}
+// 调用了析构函数 ~T()，但是 pointer 所在内存并没有释放
+// 需要分配器的 operator delete(ptr) 释放
+template &lt;typename T&gt;
+void destroy_one(T* pointer, std::false_type)
+{
+    if (pointer != nullptr)
+    {
+        pointer->~T();                                       
+    }
+}
 
-                            template &lt;typname ForwardIter&gt;
-                            void destroy_cat(ForwardIter first, ForwardIter last, std::false_type)
-                            {
-                                for (; first != last; ++first)
-                                    destroy(&*first);
-                            }
+template &lt;typename ForwardIter&gt;
+void destroy_cat(ForwardIter , ForwardIter , std::true_type) {}
 
-                            template &lt;typname T&gt;
-                            void destroy(T* pointer)
-                            {
-                                destroy_one(pointer, std::is_trivially_destructible<T>{});
-                            }
+template &lt;typename ForwardIter&gt;
+void destroy_cat(ForwardIter first, ForwardIter last, std::false_type)
+{
+    for (; first != last; ++first)
+        destroy(&*first);
+}
 
-                            template &lt;typname ForwardIter&gt;
-                            void destroy(ForwardIter first, ForwardIter last)
-                            {
-                                destroy_cat(first, last, std::is_trivially_destructible<
-                                        typename iterator_traits&lt;ForwardIter&gt;::value_type>{});
-                            }
+template &lt;typename T&gt;
+void destroy(T* pointer)
+{
+    destroy_one(pointer, std::is_trivially_destructible<T>{});
+}
 
-                            } // namespace TinySTL
+template &lt;typename ForwardIter&gt;
+void destroy(ForwardIter first, ForwardIter last)
+{
+    destroy_cat(first, last, std::is_trivially_destructible<
+            typename iterator_traits&lt;ForwardIter&gt;::value_type>{});
+}
 
-                            #endif // !TINYSTL_ALLOCATOR_H_
+} // namespace TinySTL
+
+#endif // !TINYSTL_ALLOCATOR_H_
 
                         </code></pre>
                     </p>

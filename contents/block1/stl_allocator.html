@@ -9,7 +9,9 @@
     <link rel="stylesheet" href="../../css/mobile.css">
     <link rel="stylesheet" href="../css/common.css">
     <script type="text/javascript" src="../js/comment.js"></script>
-    <script type="text/javascript" src="../code-prettify/loader/run_prettify.js"></script>
+    <link rel="stylesheet" href="../highlight/styles/atom-one-dark.min.css">
+    <script src="../highlight/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
 </head>
 <body>
     <header>
@@ -148,121 +150,119 @@
                     <p>这个接口的设计来自于 <a href="https://zh.cppreference.com/w/cpp/memory/allocator"> std::allocate</a>  的接口介绍。</p>
                     <blockquote><h3><b>源码</b></h3></blockquote>
                     <p>关于源码部分的实现，主要借鉴于 <span style="color: rgb(65, 140, 175);">STL 源码剖析</span>这本书，并且 C++11 的一些新特性实现，通过模板 <markCode>template&lt;typename T &gt;</markCode>实现泛型编程。 
-                        <pre class="prettyprint"><code class="language-cpp">
-                            #ifndef TINYSTL_ALLOCATOR_H_
-                            #define TINYSTL_ALLOCATOR_H_
+                        <pre><code class="language-cpp">
+#ifndef TINYSTL_ALLOCATOR_H_
+#define TINYSTL_ALLOCATOR_H_
 
-                            // 这个头文件包含一个模板类 allocator，用于管理内存的分配、释放，对象的构造、析构
+// 这个头文件包含一个模板类 allocator，用于管理内存的分配、释放，对象的构造、析构
 
-                            #include "stl_construct.h"
-                            #include "util.h"
+#include "stl_construct.h"
+#include "util.h"
 
-                            namespace TinySTL
-                            {
+namespace TinySTL
+{
 
-                            // 模板类：allocator
-                            // 模板函数代表数据类型
-                            template &lt;typename T&gt;
-                            class allocator
-                            {
-                            public:
-                                typedef T            value_type;
-                                typedef T*           pointer;
-                                typedef const T*     const_pointer;
-                                typedef T&           reference;
-                                typedef const T&     const_reference;
-                                typedef size_t       size_type;
-                                typedef ptrdiff_t    difference_type;
+// 模板类：allocator
+// 模板函数代表数据类型
+template &lt;typename T&gt;
+class allocator
+{
+public:
+    typedef T            value_type;
+    typedef T*           pointer;
+    typedef const T*     const_pointer;
+    typedef T&           reference;
+    typedef const T&     const_reference;
+    typedef size_t       size_type;
+    typedef ptrdiff_t    difference_type;
 
-                                public:
-                                static T*   allocate();
-                                static T*   allocate(size_type n);
+    public:
+    static T*   allocate();
+    static T*   allocate(size_type n);
 
-                                static void deallocate(T* ptr);
-                                static void deallocate(T* ptr, size_type n);
+    static void deallocate(T* ptr);
+    static void deallocate(T* ptr, size_type n);
 
-                                static void construct(T* ptr);
-                                static void construct(T* ptr, const T& value);
-                                static void construct(T* ptr, T&& value);
+    static void construct(T* ptr);
+    static void construct(T* ptr, const T& value);
+    static void construct(T* ptr, T&& value);
 
-                                template &lt;typename... Args&gt;
-                                static void construct(T* ptr, Args&& ...args);
+    template &lt;typename... Args&gt;
+    static void construct(T* ptr, Args&& ...args);
 
-                                static void destroy(T* ptr);
-                                static void destroy(T* first, T* last);
-                            };
+    static void destroy(T* ptr);
+    static void destroy(T* first, T* last);
+};
 
-                            template &lt;typename T&gt;
-                            T* allocator&lt;typename T&gt;::allocate()
-                            {
-                                return static_cast&lt;T*&gt;(::operator new(sizeof(T)));
-                            }
+template &lt;typename T&gt;
+T* allocator&lt;typename T&gt;::allocate()
+{
+    return static_cast&lt;T*&gt;(::operator new(sizeof(T)));
+}
 
-                            template &lt;typename T&gt;
-                            T* allocator&lt;T&gt;::allocate(size_type n)
-                            {
-                                if (n == 0)
-                                    return nullptr;
-                                return static_cast&lt;T*&gt;(::operator new(n * sizeof(T)));
-                            }
+template &lt;typename T&gt;
+T* allocator&lt;T&gt;::allocate(size_type n)
+{
+    if (n == 0)
+        return nullptr;
+    return static_cast&lt;T*&gt;(::operator new(n * sizeof(T)));
+}
 
-                            template &lt;typename T&gt;
-                            void allocator&lt;T&gt;::deallocate(T* ptr)
-                            {
-                                if (ptr == nullptr)
-                                    return;
-                                ::operator delete(ptr);
-                            }
+template &lt;typename T&gt;
+void allocator&lt;T&gt;::deallocate(T* ptr)
+{
+    if (ptr == nullptr)
+        return;
+    ::operator delete(ptr);
+}
 
-                            template &lt;typename T&gt;
-                            void allocator&lt;T&gt;::deallocate(T* ptr, size_type /*size*/)
-                            {
-                                if (ptr == nullptr)
-                                    return;
-                                ::operator delete(ptr);
-                            }
+template &lt;typename T&gt;
+void allocator&lt;T&gt;::deallocate(T* ptr, size_type /*size*/)
+{
+    if (ptr == nullptr)
+        return;
+    ::operator delete(ptr);
+}
 
-                            template &lt;typename T&gt;
-                            void allocator&lt;T&gt;::construct(T* ptr)
-                            {
-                                TinySTL::construct(ptr);
-                            }
+template &lt;typename T&gt;
+void allocator&lt;T&gt;::construct(T* ptr)
+{
+    TinySTL::construct(ptr);
+}
 
-                            template &lt;typename T&gt;
-                            void allocator&lt;T&gt;::construct(T* ptr, const T& value)
-                            {
-                                TinySTL::construct(ptr, value);
-                            }
+template &lt;typename T&gt;
+void allocator&lt;T&gt;::construct(T* ptr, const T& value)
+{
+    TinySTL::construct(ptr, value);
+}
 
-                            template &lt;typename T&gt;
-                            void allocator&lt;T&gt;::construct(T* ptr, T&& value)
-                            {
-                                TinySTL::construct(ptr, TinySTL::move(value));
-                            }
+template &lt;typename T&gt;
+void allocator&lt;T&gt;::construct(T* ptr, T&& value)
+{
+    TinySTL::construct(ptr, TinySTL::move(value));
+}
 
-                            template &lt;typename T&gt;
-                            template &lt;typename...Args&gt;
-                            void allocator&lt;T&gt;::construct(T* ptr, Args&& ...args)
-                            {
-                                TinySTL::construct(ptr, TinySTL::forward<Args>(args)...);
-                            }
+template &lt;typename T&gt;
+template &lt;typename...Args&gt;
+void allocator&lt;T&gt;::construct(T* ptr, Args&& ...args)
+{
+    TinySTL::construct(ptr, TinySTL::forward<Args>(args)...);
+}
 
-                            template &lt;typename T&gt;
-                            void allocator&lt;T&gt;::destroy(T* ptr)
-                            {
-                                TinySTL::destroy(ptr);
-                            }
+template &lt;typename T&gt;
+void allocator&lt;T&gt;::destroy(T* ptr)
+{
+    TinySTL::destroy(ptr);
+}
 
-                            template &lt;typename T&gt;
-                            void allocator&lt;T&gt;::destroy(T* first, T* last)
-                            {
-                                TinySTL::destroy(first, last);
-                            }
+template &lt;typename T&gt;
+void allocator&lt;T&gt;::destroy(T* first, T* last)
+{
+    TinySTL::destroy(first, last);
+}
 
-                            } // namespace TinySTL
-                            #endif // !TINYSTL_ALLOCATOR_H_
-
-
+} // namespace TinySTL
+#endif // !TINYSTL_ALLOCATOR_H_
                         </code></pre>
                     </p>
                     <blockquote><h3><b>测试</b></h3></blockquote>
