@@ -4,7 +4,7 @@ table{
 	border-collapse: collapse;/*让靠在一起的单元格只显示一个边框，边框不进行叠加*/
 	font-style:normal;      /* italic; 斜体*/
 	font-size:15px;
-	font-family:courier new, 楷体;
+	font-family:consolas, courier new, 楷体;
 }
 			
 table tr th{

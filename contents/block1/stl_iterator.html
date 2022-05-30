@@ -194,127 +194,150 @@ struct iterator_traits&lt;const T*&gt; { // 针对 const 原生指针的偏特�
                             <tr><th>函数</th>             <th>定义</th>
                             <tr><td>template &lt;typename Iterator&gt;<br>typename iterator_traits&lt;Iterator&gt;::value_type*<br>value_type(const Iterator&);</td>       <td>萃取迭代器所指对象类型</td>
                             <tr><td>template &lt;typename Iterator&gt;<br>typename iterator_traits&lt;Iterator&gt;::iterator_category<br>iterator_category(const Iterator&);</td>       <td>萃取迭代器类型</td>
-                            <tr><td>template &lt;typename Iterator&gt;<br>typename iterator_traits&lt;Iterator&gt;::difference_type<br>distance(Iterator first, Iterator last);</td>       <td>迭代器之间的距离</td>
-                            <tr><td>template &lt;typename InputIterator&gt;<br>typename iterator_traits&lt;InputIterator&gt;::difference_type<br>__distance(InputIterator first, InputIterator last);</td>       <td>Input_Iterator迭代器之间的距离</td>
-                            <tr><td>template &lt;typename BidirectionalIterator&gt;<br>typename iterator_traits&lt;BidirectionalIterator&gt;::difference_type<br>__distance(InputIterator first, InputIterator last);</td>       <td>Input_Iterator迭代器之间的距离</td>
+                            <tr><td>template &lt;typename InputIterator&gt;<br>typename iterator_traits&lt;InputIterator&gt;::difference_type<br>distance(InputIterator first, InputIterator last);</td>       <td>迭代器之间的距离</td>
+                            <tr><td>template &lt;typename InputIterator&gt;<br>typename iterator_traits&lt;InputIterator&gt;::difference_type<br>__distance(InputIterator first, InputIterator last,<br> input_iterator_tag);</td>       <td>input_iterator_tag迭代器之间<br>的距离</td>
+                            <tr><td>template &lt;typename RandomAccessIterator&gt;<br>typename iterator_traits&lt;RandomAccessIterator&gt;::difference_type<br>__distance(RandomAccessIterator first, RandomAccessIterator last,<br> random_access_iterator_tag);</td>       <td>random_access_iterator_tag迭<br>代器之间的距离</td>
+                            <tr><td>template &lt;typename InputIterator, typename Distance&gt;<br>void advance(InputIterator &i, Distance n);</td>       <td>迭代器移动n个距离</td>
+                            <tr><td>template &lt;typename InputIterator, typename Distance&gt;<br>void __advance(InputIterator &i, Distance n, input_iterator_tag);</td>       <td>input_iterator_tag迭代器移动n<br>个距离</td>
+                            <tr><td>template &lt;typename BidirectionalIterator, typename Distance&gt;<br>void __advance(BidirectionalIterator &i, Distance n,<br> bidirectional_iterator_tag);</td>       <td>bidirectional_iterator_tag迭代器移<br>动n个距离</td>
+                            <tr><td>template &lt;typename RandomAccessIterator, typename Distance&gt;<br>void __advance(RandomAccessIterator &i, Distance n,<br> random_access_iterator_tag);</td>       <td>random_access_iterator_tag迭<br>代器移动n个距离</td>
                         </table>
                     </p>
                     
                     <blockquote><h3><b>源码</b></h3></blockquote>
-                    <p>关于源码部分的实现，主要借鉴于 <span style="color: rgb(65, 140, 175);">STL 源码剖析</span>这本书，并且 C++11 的一些新特性实现，通过模板 <markCode>template&lt;typename T &gt;</markCode>实现泛型编程。 
+                    <p> 本章迭代器以及对迭代器相关的操作定义如下，另外，后来的标准库添加了翻转链表的操作，为了减少代码量，方便阅读，这里就先不定义了迭代器的反转操作。
                         <pre><code class="language-cpp">
-#ifndef TINYSTL_ALLOCATOR_H_
-#define TINYSTL_ALLOCATOR_H_
+#ifndef STL_ITERATOR_H
+#define STL_ITERATOR_H
 
-// 这个头文件包含一个模板类 allocator，用于管理内存的分配、释放，对象的构造、析构
+#include &lt;cstddef&gt;
 
-#include "stl_construct.h"
-#include "util.h"
+namespace TinySTL {
+    // 1. 定义5种迭代器类型
+    struct input_iterator_tag { };                                               // 输入迭代器
+    struct output_iterator_tag { };                                              // 输出迭代器
+    struct forward_iterator_tag : public input_iterator_tag { };                 // 前向迭代器
+    struct bidirectional_iterator_tag : public forward_iterator_tag { };         // 双向迭代器
+    struct random_access_iterator_tag : public bidirectional_iterator_tag { };   // 随机迭代器
 
-namespace TinySTL
-{
+    // 2. 定义迭代器
+    template &lt;typename Category, typename T, typename Distance=ptrdiff_t, typename Pointer=T*, typename Reference=T&&gt;
+    struct iterator {
+        typedef Category     iterator_category;
+        typedef T            value_type;
+        typedef Pointer      pointer;
+        typedef Reference    reference;
+        typedef Distance     difference_type;
+    };
 
-// 模板类：allocator
-// 模板函数代表数据类型
-template &lt;typename T&gt;
-class allocator
-{
-public:
-    typedef T            value_type;
-    typedef T*           pointer;
-    typedef const T*     const_pointer;
-    typedef T&           reference;
-    typedef const T&     const_reference;
-    typedef size_t       size_type;
-    typedef ptrdiff_t    difference_type;
+    // 3. 定义萃取机
+    template &lt;typename T&gt;
+    struct iterator_traits {
+        typedef random_access_iterator_tag     iterator_category;
+        typedef T                              value_type;
+        typedef T*                             pointer;
+        typedef T&                             reference;
+        typedef ptrdiff_t                      difference_type;
+    };
 
-    public:
-    static T*   allocate();
-    static T*   allocate(size_type n);
+    template &lt;typename T&gt;
+    struct iterator_traits<T*> {               // 偏特化原生指针版本1
+        typedef random_access_iterator_tag iterator_category;
+        typedef T                          value_type;
+        typedef T*                         pointer;
+        typedef T&                         reference;
+        typedef ptrdiff_t                  difference_type;
+    };
 
-    static void deallocate(T* ptr);
-    static void deallocate(T* ptr, size_type n);
+    template &lt;typename T&gt;
+    struct iterator_traits&lt;const T*&gt; {        // 偏特化原生指针版本2
+        typedef random_access_iterator_tag           iterator_category;
+        typedef T                                    value_type;
+        typedef const T*                             pointer;
+        typedef const T&                             reference;
+        typedef ptrdiff_t                            difference_type;
+    };
 
-    static void construct(T* ptr);
-    static void construct(T* ptr, const T& value);
-    static void construct(T* ptr, T&& value);
+    // 4. 定义函数 iterator_category() 萃取迭代器类型
+    template &lt;typename Iterator&gt;
+    typename iterator_traits&lt;Iterator&gt;::iterator_category
+    iterator_category(const Iterator&) {
+        typedef typename iterator_traits&lt;Iterator&gt;::iterator_category category;
+        return category();
+    }
 
-    template &lt;typename... Args&gt;
-    static void construct(T* ptr, Args&& ...args);
+    // 5. 定义函数 distance_type() 萃取迭代器的距离类型
+    template &lt;typename Iterator&gt;
+    typename iterator_traits&lt;Iterator&gt;::difference_type*
+    distance_type(const Iterator&) {
+        return static_cast<typename iterator_traits&lt;Iterator&gt;::difference_type*> (0);
+    }
 
-    static void destroy(T* ptr);
-    static void destroy(T* first, T* last);
-};
+    // 6. 定义函数 value_type() 萃取迭代器所指对象类型
+    template &lt;typename Iterator&gt;
+    typename iterator_traits&lt;Iterator&gt;::value_type*
+    value_type(const Iterator&) {
+        return static_cast&lt;typename iterator_traits&lt;Iterator&gt;::value_type*&gt; (0);
+    }
 
-template &lt;typename T&gt;
-T* allocator&lt;typename T&gt;::allocate()
-{
-    return static_cast&lt;T*&gt;(::operator new(sizeof(T)));
+    // 7. 定义函数 distance() 计算 first 和 last 之间的距离
+    //// input_iterator_tag, forward_iterator_tag, bidirectional_iterator_tag
+    template &lt;typename InputIterator&gt;
+    typename iterator_traits&lt;InputIterator&gt;::difference_type
+    __distance(InputIterator first, InputIterator last, input_iterator_tag) {            
+        typename iterator_traits&lt;InputIterator&gt;::difference_type n = 0;
+        while (first != last) {
+            first++;
+            n++;
+        }
+        return n;
+    }
+
+    //// random_access_iterator_tag
+    template &lt;typename RandomAccessIterator&gt;
+    typename iterator_traits&lt;RandomAccessIterator&gt;::difference_type
+    __distance(RandomAccessIterator first, RandomAccessIterator last, random_access_iterator_tag) {
+        return last - first;                                                             
+    }
+
+    template &lt;typename InputIterator&gt;
+    typename iterator_traits&lt;InputIterator&gt;::difference_type
+    distance(InputIterator first, InputIterator last) {
+        typedef typename iterator_traits&lt;InputIterator&gt;::iterator_category category;
+        return __distance(first, last, category());
+    }
+
+    // 8. 定义函数 advance() 使得指针向前移动
+    //// input_iterator_tag, forward_iterator_tag
+    template &lt;typename InputIterator, typename Distance&gt;
+    void __advance(InputIterator &i, Distance n, input_iterator_tag) {                    
+        while (n--)
+            ++i;
+    }
+
+    //// bidirectional_iterator_tag
+    template &lt;typename BidirectionalIterator, typename Distance&gt;
+    void __advance(BidirectionalIterator &i, Distance n, bidirectional_iterator_tag) {    
+        if (n > = 0)
+            while( n-- ) ++i;
+        else
+            while ( n++ ) --i;
+    }
+
+    //// random_access_iterator_tag
+    template &lt;typename RandomAccessIterator, typename Distance&gt;
+    void __advance(RandomAccessIterator &i, Distance n, random_access_iterator_tag) {     
+        i += n;
+    }
+
+    template &lt;typename InputIterator, typename Distance&gt;
+    void advance(InputIterator &i, Distance n) {
+        __advance(i, n, iterator_category(i));                              
+    }
 }
 
-template &lt;typename T&gt;
-T* allocator&lt;T&gt;::allocate(size_type n)
-{
-    if (n == 0)
-        return nullptr;
-    return static_cast&lt;T*&gt;(::operator new(n * sizeof(T)));
-}
 
-template &lt;typename T&gt;
-void allocator&lt;T&gt;::deallocate(T* ptr)
-{
-    if (ptr == nullptr)
-        return;
-    ::operator delete(ptr);
-}
-
-template &lt;typename T&gt;
-void allocator&lt;T&gt;::deallocate(T* ptr, size_type /*size*/)
-{
-    if (ptr == nullptr)
-        return;
-    ::operator delete(ptr);
-}
-
-template &lt;typename T&gt;
-void allocator&lt;T&gt;::construct(T* ptr)
-{
-    TinySTL::construct(ptr);
-}
-
-template &lt;typename T&gt;
-void allocator&lt;T&gt;::construct(T* ptr, const T& value)
-{
-    TinySTL::construct(ptr, value);
-}
-
-template &lt;typename T&gt;
-void allocator&lt;T&gt;::construct(T* ptr, T&& value)
-{
-    TinySTL::construct(ptr, TinySTL::move(value));
-}
-
-template &lt;typename T&gt;
-template &lt;typename...Args&gt;
-void allocator&lt;T&gt;::construct(T* ptr, Args&& ...args)
-{
-    TinySTL::construct(ptr, TinySTL::forward<Args>(args)...);
-}
-
-template &lt;typename T&gt;
-void allocator&lt;T&gt;::destroy(T* ptr)
-{
-    TinySTL::destroy(ptr);
-}
-
-template &lt;typename T&gt;
-void allocator&lt;T&gt;::destroy(T* first, T* last)
-{
-    TinySTL::destroy(first, last);
-}
-
-} // namespace TinySTL
-#endif // !TINYSTL_ALLOCATOR_H_
+#endif 
                         </code></pre>
                     </p>
                     <blockquote><h3><b>测试</b></h3></blockquote>
