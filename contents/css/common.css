@@ -34,3 +34,10 @@ markCode {
     padding: 0 3px;
 }
 
+#lst {
+	font-size:15px;
+	font-family:consolas, courier new, 微软雅黑;
+	color:#4F4F4F;
+	list-style-position:inside;                    /* 在文本中显示，看起来像缩进 */
+} 
+

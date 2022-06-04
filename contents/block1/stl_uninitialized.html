@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TinySTL之类型萃取type_traits</title>
+    <title>TinySTL之内存处理工具 stl_uninitialized</title>
     <link rel="shortcut icon" href="./img/bitbug_favicon.ico">
     <link rel="stylesheet" href="../../plugin/layui/css/layui.css">
     <link rel="stylesheet" href="../../css/common.css">
@@ -105,9 +105,9 @@
         </div>
         <div class="item-list">
             <div class="article-content-box layui-row">
-                <h1>TinySTL 之类型萃取 type_traits</h1>
+                <h1>TinySTL之内存处理工具 stl_uninitialized</h1>
                 <div class="article-param layui-row">
-                    2022-5-29 <span><a href="#">大BUG</a></span><span>阅读数：2019</span><span>评论数：15</span>&nbsp;&nbsp;
+                    2022-06-01 <span><a href="#">大BUG</a></span><span>阅读数：2019</span><span>评论数：15</span>&nbsp;&nbsp;
                     <span class="hz-span layui-badge layui-bg-gray">C++</span>
                     <span class="hz-span layui-badge layui-bg-gray">泛型编程</span>
                     <span class="hz-span layui-badge layui-bg-gray">小项目</span>
@@ -117,9 +117,11 @@
                 </div>
                 <article>
                     <p>
-                        之前对迭代器进行过类型萃取，得到迭代器所指对象类型。同理，我们仍然可以对其他类型的数据进行特性萃取，例如下面的例子，我们对猫和狗能不能被吃的特性进行了萃取，根据萃取结果选择合适的函数
+                        STL 中有 5 各函数模板，作用在未初始化的空间上，这 5 个函数模板如下
                     </p>
-                    <blockquote><h3><b>萃取猫的可食用性</b></h3></blockquote>
+                    <p align="center"><img src="img/stl_uninitialized/fig1.png" alt="5个函数模板" width="850px"></p>
+                    <p>其中的 <markCode>construct()</markCode> 和 <markCode>destroy()</markCode> 函数在空间分配器（allocator）时用到过，这里就介绍其他 3 个函数。 </p>
+                    <blockquote><h3><b>函数模板 uninitialized_copy</b></h3></blockquote>
                     <p>代码如下：</p>
                     <pre>
                         <code class="language-cpp">
